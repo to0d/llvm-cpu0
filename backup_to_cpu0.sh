@@ -16,8 +16,8 @@ for modified_file in $(cat modified_list.txt)
     #echo $fr_path
     #echo $to_path
 
-    mkdir -p $ {dirname $to_path}
-    cp -fr $fr_path $to_path
+    mkdir -p $(dirname $to_path)
+    cp -frv $fr_path $to_path
 }
 
 rm -f modified_list.txt

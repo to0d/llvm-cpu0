@@ -8,6 +8,7 @@ set(LLVM_TARGET_DEFINITIONS Cpu0Other.td)
 #  came from Cpu0InstrInfo.td.
 tablegen(LLVM Cpu0GenRegisterInfo.inc -gen-register-info)
 tablegen(LLVM Cpu0GenInstrInfo.inc -gen-instr-info)
+tablegen(LLVM Cpu0GenDAGISel.inc -gen-dag-isel)
 tablegen(LLVM Cpu0GenCallingConv.inc -gen-callingconv)
 tablegen(LLVM Cpu0GenSubtargetInfo.inc -gen-subtarget)
 tablegen(LLVM Cpu0GenMCPseudoLowering.inc -gen-pseudo-lowering)
@@ -31,13 +32,17 @@ add_llvm_target(Cpu0CodeGen
   Cpu0TargetMachine.cpp
 
   LINK_COMPONENTS
+  Analysis
+  AsmPrinter
   CodeGen
   Core
+  MC
   Cpu0Desc
   Cpu0Info
   SelectionDAG
   Support
   Target
+  GlobalISel
 
   ADD_TO_COMPONENT
   Cpu0

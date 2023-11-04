@@ -13,6 +13,8 @@
 
 #include "Cpu0FrameLowering.h"
 
+#include "Cpu0InstrInfo.h"
+#include "Cpu0MachineFunction.h"
 #include "Cpu0Subtarget.h"
 #include "llvm/CodeGen/MachineFrameInfo.h"
 #include "llvm/CodeGen/MachineFunction.h"

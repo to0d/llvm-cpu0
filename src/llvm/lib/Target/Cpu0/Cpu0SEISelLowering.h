@@ -17,6 +17,7 @@
 #include "Cpu0Config.h"
 
 #include "Cpu0ISelLowering.h"
+#include "Cpu0RegisterInfo.h"
 
 namespace llvm {
   class Cpu0SETargetLowering : public Cpu0TargetLowering  {

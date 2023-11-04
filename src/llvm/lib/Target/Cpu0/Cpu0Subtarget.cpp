@@ -13,6 +13,7 @@
 
 #include "Cpu0Subtarget.h"
 
+#include "Cpu0MachineFunction.h"
 #include "Cpu0.h"
 #include "Cpu0RegisterInfo.h"
 

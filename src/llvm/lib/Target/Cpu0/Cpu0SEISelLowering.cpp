@@ -10,6 +10,7 @@
 // Subclass of Cpu0TargetLowering specialized for cpu032.
 //
 //===----------------------------------------------------------------------===//
+#include "Cpu0MachineFunction.h"
 #include "Cpu0SEISelLowering.h"
 
 #include "Cpu0RegisterInfo.h"

@@ -13,7 +13,9 @@
 //===----------------------------------------------------------------------===//
 #include "Cpu0ISelLowering.h"
 
+#include "Cpu0MachineFunction.h"
 #include "Cpu0TargetMachine.h"
+#include "Cpu0TargetObjectFile.h"
 #include "Cpu0Subtarget.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/CodeGen/CallingConvLower.h"

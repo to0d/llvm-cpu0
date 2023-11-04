@@ -18,6 +18,7 @@
 
 #include "Cpu0FrameLowering.h"
 #include "Cpu0ISelLowering.h"
+#include "Cpu0InstrInfo.h"
 #include "llvm/CodeGen/SelectionDAGTargetInfo.h"
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
 #include "llvm/IR/DataLayout.h"
@@ -145,6 +146,7 @@ protected:
 
   const SelectionDAGTargetInfo TSInfo;
 
+  std::unique_ptr<const Cpu0InstrInfo> InstrInfo;
   std::unique_ptr<const Cpu0FrameLowering> FrameLowering;
   std::unique_ptr<const Cpu0TargetLowering> TLInfo;
 
@@ -187,8 +189,12 @@ public:
   const SelectionDAGTargetInfo *getSelectionDAGInfo() const override {
     return &TSInfo;
   }
+  const Cpu0InstrInfo *getInstrInfo() const override { return InstrInfo.get(); }
   const TargetFrameLowering *getFrameLowering() const override {
     return FrameLowering.get();
+  }
+  const Cpu0RegisterInfo *getRegisterInfo() const override {
+    return &InstrInfo->getRegisterInfo();
   }
   const Cpu0TargetLowering *getTargetLowering() const override {
     return TLInfo.get();

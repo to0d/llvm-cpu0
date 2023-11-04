@@ -14,6 +14,7 @@
 #include "Cpu0Subtarget.h"
 
 #include "Cpu0.h"
+#include "Cpu0RegisterInfo.h"
 
 #include "Cpu0TargetMachine.h"
 #include "llvm/IR/Attributes.h"
@@ -42,6 +43,8 @@ Cpu0Subtarget::Cpu0Subtarget(const Triple &TT, StringRef CPU,
   // Cpu0GenSubtargetInfo will display features by llc -march=cpu0 -mcpu=help
   Cpu0GenSubtargetInfo(TT, CPU, /*TuneCPU*/ CPU, FS),
   IsLittle(little), TM(_TM), TargetTriple(TT), TSInfo(),
+      InstrInfo(
+          Cpu0InstrInfo::create(initializeSubtargetDependencies(CPU, FS, TM))),
       FrameLowering(Cpu0FrameLowering::create(*this)),
       TLInfo(Cpu0TargetLowering::create(TM, *this)) {
 

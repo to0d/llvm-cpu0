@@ -1,0 +1,34 @@
+Available CPUs for this target:
+
+  cpu032I  - Select the cpu032I processor.
+  cpu032II - Select the cpu032II processor.
+
+Available features for this target:
+
+  ch10_1   - Enable Chapter instructions..
+  ch11_1   - Enable Chapter instructions..
+  ch11_2   - Enable Chapter instructions..
+  ch12_1   - Enable Chapter instructions..
+  ch3_1    - Enable Chapter instructions..
+  ch3_2    - Enable Chapter instructions..
+  ch3_3    - Enable Chapter instructions..
+  ch3_4    - Enable Chapter instructions..
+  ch3_5    - Enable Chapter instructions..
+  ch4_1    - Enable Chapter instructions..
+  ch4_2    - Enable Chapter instructions..
+  ch5_1    - Enable Chapter instructions..
+  ch6_1    - Enable Chapter instructions..
+  ch7_1    - Enable Chapter instructions..
+  ch8_1    - Enable Chapter instructions..
+  ch8_2    - Enable Chapter instructions..
+  ch9_1    - Enable Chapter instructions..
+  ch9_2    - Enable Chapter instructions..
+  ch9_3    - Enable Chapter instructions..
+  chall    - Enable Chapter instructions..
+  cmp      - Enable 'cmp' instructions..
+  cpu032I  - Cpu032I ISA Support.
+  cpu032II - Cpu032II ISA Support (slt).
+  slt      - Enable 'slt' instructions..
+
+Use +feature to enable a feature, or -feature to disable it.
+For example, llc -mcpu=mycpu -mattr=+feature1,-feature2

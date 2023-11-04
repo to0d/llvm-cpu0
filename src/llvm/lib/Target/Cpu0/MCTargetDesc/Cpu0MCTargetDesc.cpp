@@ -37,6 +37,12 @@ using namespace llvm;
 #define GET_REGINFO_MC_DESC
 #include "Cpu0GenRegisterInfo.inc"
 
+static MCInstrInfo *createCpu0MCInstrInfo() {
+  MCInstrInfo *X = new MCInstrInfo();
+  InitCpu0MCInstrInfo(X); // defined in Cpu0GenInstrInfo.inc
+  return X;
+}
+
 static MCAsmInfo *createCpu0MCAsmInfo(const MCRegisterInfo &MRI,
                                       const Triple &TT,
                                       const MCTargetOptions &Options) {
@@ -54,6 +60,9 @@ extern "C" void LLVMInitializeCpu0TargetMC() {
   for (Target *T : {&TheCpu0Target, &TheCpu0elTarget}) {
     // Register the MC asm info.
     RegisterMCAsmInfoFn X(*T, createCpu0MCAsmInfo);
+
+    // Register the MC instruction info.
+    TargetRegistry::RegisterMCInstrInfo(*T, createCpu0MCInstrInfo);
   }
 
 }

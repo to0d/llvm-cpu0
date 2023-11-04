@@ -42,7 +42,8 @@ Cpu0Subtarget::Cpu0Subtarget(const Triple &TT, StringRef CPU,
   // Cpu0GenSubtargetInfo will display features by llc -march=cpu0 -mcpu=help
   Cpu0GenSubtargetInfo(TT, CPU, /*TuneCPU*/ CPU, FS),
   IsLittle(little), TM(_TM), TargetTriple(TT), TSInfo(),
-      FrameLowering(Cpu0FrameLowering::create(*this)){
+      FrameLowering(Cpu0FrameLowering::create(*this)),
+      TLInfo(Cpu0TargetLowering::create(TM, *this)) {
 
 }
 

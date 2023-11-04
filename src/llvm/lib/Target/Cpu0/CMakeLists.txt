@@ -17,7 +17,9 @@ add_public_tablegen_target(Cpu0CommonTableGen)
 # Cpu0CodeGen should match with LLVMBuild.txt Cpu0CodeGen
 add_llvm_target(Cpu0CodeGen
   Cpu0FrameLowering.cpp
+  Cpu0ISelLowering.cpp
   Cpu0SEFrameLowering.cpp
+  Cpu0SEISelLowering.cpp
   Cpu0Subtarget.cpp
   Cpu0TargetMachine.cpp
 

@@ -27,6 +27,7 @@ add_llvm_target(Cpu0CodeGen
   Cpu0SEISelLowering.cpp
   Cpu0SERegisterInfo.cpp
   Cpu0Subtarget.cpp
+  Cpu0TargetObjectFile.cpp
   Cpu0TargetMachine.cpp
 
   LINK_COMPONENTS

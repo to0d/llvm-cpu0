@@ -43,6 +43,12 @@ static MCInstrInfo *createCpu0MCInstrInfo() {
   return X;
 }
 
+static MCRegisterInfo *createCpu0MCRegisterInfo(const Triple &TT) {
+  MCRegisterInfo *X = new MCRegisterInfo();
+  InitCpu0MCRegisterInfo(X, Cpu0::SW); // defined in Cpu0GenRegisterInfo.inc
+  return X;
+}
+
 static MCAsmInfo *createCpu0MCAsmInfo(const MCRegisterInfo &MRI,
                                       const Triple &TT,
                                       const MCTargetOptions &Options) {
@@ -63,6 +69,9 @@ extern "C" void LLVMInitializeCpu0TargetMC() {
 
     // Register the MC instruction info.
     TargetRegistry::RegisterMCInstrInfo(*T, createCpu0MCInstrInfo);
+
+    // Register the MC register info.
+    TargetRegistry::RegisterMCRegInfo(*T, createCpu0MCRegisterInfo);
   }
 
 }

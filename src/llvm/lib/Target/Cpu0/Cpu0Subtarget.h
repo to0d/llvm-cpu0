@@ -152,6 +152,7 @@ protected:
 
 public:
   bool isPositionIndependent() const;
+  const Cpu0ABIInfo &getABI() const;
 
   /// This constructor initializes the data members to match that
   /// of the specified triple.

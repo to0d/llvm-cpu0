@@ -105,4 +105,5 @@ bool Cpu0Subtarget::abiUsesSoftFloat() const {
   return true;
 }
 
+const Cpu0ABIInfo &Cpu0Subtarget::getABI() const { return TM.getABI(); }
 

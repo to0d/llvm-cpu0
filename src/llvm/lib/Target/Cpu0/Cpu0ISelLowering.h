@@ -17,6 +17,7 @@
 
 #include "Cpu0Config.h"
 
+#include "MCTargetDesc/Cpu0ABIInfo.h"
 #include "Cpu0.h"
 #include "llvm/CodeGen/CallingConvLower.h"
 #include "llvm/CodeGen/SelectionDAG.h"
@@ -98,6 +99,8 @@ namespace llvm {
   protected:
     // Subtarget Info
     const Cpu0Subtarget &Subtarget;
+    // Cache the ABI from the TargetMachine, we use it everywhere.
+    const Cpu0ABIInfo &ABI;
 
   private:
 

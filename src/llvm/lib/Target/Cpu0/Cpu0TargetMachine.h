@@ -16,6 +16,7 @@
 
 #include "Cpu0Config.h"
 
+#include "MCTargetDesc/Cpu0ABIInfo.h"
 #include "Cpu0Subtarget.h"
 #include "llvm/CodeGen/Passes.h"
 #include "llvm/CodeGen/SelectionDAGISel.h"
@@ -30,6 +31,8 @@ class Cpu0RegisterInfo;
 class Cpu0TargetMachine : public LLVMTargetMachine {
   bool isLittle;
   std::unique_ptr<TargetLoweringObjectFile> TLOF;
+  // Selected ABI
+  Cpu0ABIInfo ABI;
   Cpu0Subtarget DefaultSubtarget;
 
   mutable StringMap<std::unique_ptr<Cpu0Subtarget>> SubtargetMap;
@@ -53,6 +56,7 @@ public:
     return TLOF.get();
   }
   bool isLittleEndian() const { return isLittle; }
+  const Cpu0ABIInfo &getABI() const { return ABI; }
 };
 
 /// Cpu0ebTargetMachine - Cpu032 big endian target machine.

@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "Cpu0MCTargetDesc.h"
+#include "Cpu0MCAsmInfo.h"
 #include "llvm/MC/MachineLocation.h"
 #include "llvm/MC/MCELFStreamer.h"
 #include "llvm/MC/MCInstrAnalysis.h"
@@ -36,8 +37,24 @@ using namespace llvm;
 #define GET_REGINFO_MC_DESC
 #include "Cpu0GenRegisterInfo.inc"
 
+static MCAsmInfo *createCpu0MCAsmInfo(const MCRegisterInfo &MRI,
+                                      const Triple &TT,
+                                      const MCTargetOptions &Options) {
+  MCAsmInfo *MAI = new Cpu0MCAsmInfo(TT);
+
+  unsigned SP = MRI.getDwarfRegNum(Cpu0::SP, true);
+  MCCFIInstruction Inst = MCCFIInstruction::createDefCfaRegister(nullptr, SP);
+  MAI->addInitialFrameState(Inst);
+
+  return MAI;
+}
+
 //@2 {
 extern "C" void LLVMInitializeCpu0TargetMC() {
+  for (Target *T : {&TheCpu0Target, &TheCpu0elTarget}) {
+    // Register the MC asm info.
+    RegisterMCAsmInfoFn X(*T, createCpu0MCAsmInfo);
+  }
 
 }
 //@2 }

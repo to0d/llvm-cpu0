@@ -1,0 +1,19 @@
+; ModuleID = 'ch3/ch3.bc'
+source_filename = "ch3.cpp"
+target datalayout = "E-m:m-p:32:32-i8:8:32-i16:16:32-i64:64-n32-S64"
+target triple = "mips-unknown-linux-gnu"
+
+; Function Attrs: noinline norecurse nounwind optnone mustprogress
+define dso_local i32 @main() #0 {
+  %1 = alloca i32, align 4
+  store i32 0, i32* %1, align 4
+  ret i32 0
+}
+
+attributes #0 = { noinline norecurse nounwind optnone mustprogress "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="mips32r2" "target-features"="+mips32r2,-noabicalls" "unsafe-fp-math"="false" "use-soft-float"="false" }
+
+!llvm.module.flags = !{!0}
+!llvm.ident = !{!1}
+
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{!"clang version 12.0.1 (git@github.com:llvm/llvm-project 7c1423373ee6abc448f85b39c815d6cb57f0f0df)"}

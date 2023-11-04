@@ -14,6 +14,7 @@
 #include "Cpu0TargetMachine.h"
 #include "Cpu0.h"
 
+#include "Cpu0Subtarget.h"
 #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
 #include "llvm/IR/Attributes.h"
 #include "llvm/IR/Function.h"
@@ -86,7 +87,8 @@ Cpu0TargetMachine::Cpu0TargetMachine(const Target &T, const Triple &TT,
     : LLVMTargetMachine(T, computeDataLayout(TT, CPU, Options, isLittle), TT,
                         CPU, FS, Options, getEffectiveRelocModel(JIT, RM),
                         getEffectiveCodeModel(CM, CodeModel::Small), OL),
-      isLittle(isLittle), TLOF(std::make_unique<TargetLoweringObjectFileELF>()){
+      isLittle(isLittle), TLOF(std::make_unique<TargetLoweringObjectFileELF>()),
+      DefaultSubtarget(TT, CPU, FS, isLittle, *this) {
   // initAsmInfo will display features by llc -march=cpu0 -mcpu=help on 3.7 but
   // not on 3.6
   initAsmInfo();
@@ -113,6 +115,23 @@ Cpu0elTargetMachine::Cpu0elTargetMachine(const Target &T, const Triple &TT,
                                          Optional<CodeModel::Model> CM,
                                          CodeGenOpt::Level OL, bool JIT)
     : Cpu0TargetMachine(T, TT, CPU, FS, Options, RM, CM, OL, JIT, true) {}
+
+const Cpu0Subtarget *
+Cpu0TargetMachine::getSubtargetImpl(const Function &F) const {
+  std::string CPU = TargetCPU;
+  std::string FS = TargetFS;
+
+  auto &I = SubtargetMap[CPU + FS];
+  if (!I) {
+    // This needs to be done before we create a new subtarget since any
+    // creation will depend on the TM and the code generation flags on the
+    // function that reside in TargetOptions.
+    resetTargetOptions(F);
+    I = std::make_unique<Cpu0Subtarget>(TargetTriple, CPU, FS, isLittle,
+                                         *this);
+  }
+  return I.get();
+}
 
 TargetPassConfig *Cpu0TargetMachine::createPassConfig(PassManagerBase &PM) {
   return new TargetPassConfig(*this, PM);

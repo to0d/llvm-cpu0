@@ -16,6 +16,7 @@ add_public_tablegen_target(Cpu0CommonTableGen)
 
 # Cpu0CodeGen should match with LLVMBuild.txt Cpu0CodeGen
 add_llvm_target(Cpu0CodeGen
+  Cpu0Subtarget.cpp
   Cpu0TargetMachine.cpp
 
   LINK_COMPONENTS
@@ -23,6 +24,7 @@ add_llvm_target(Cpu0CodeGen
   Core
   Cpu0Desc
   Cpu0Info
+  SelectionDAG
   Support
   Target
 

@@ -1,0 +1,47 @@
+Available CPUs for this target:
+
+  cpu032I  - Select the cpu032I processor.
+  cpu032II - Select the cpu032II processor.
+
+Available features for this target:
+
+  ch10_1   - Enable Chapter instructions..
+  ch11_1   - Enable Chapter instructions..
+  ch11_2   - Enable Chapter instructions..
+  ch12_1   - Enable Chapter instructions..
+  ch3_1    - Enable Chapter instructions..
+  ch3_2    - Enable Chapter instructions..
+  ch3_3    - Enable Chapter instructions..
+  ch3_4    - Enable Chapter instructions..
+  ch3_5    - Enable Chapter instructions..
+  ch4_1    - Enable Chapter instructions..
+  ch4_2    - Enable Chapter instructions..
+  ch5_1    - Enable Chapter instructions..
+  ch6_1    - Enable Chapter instructions..
+  ch7_1    - Enable Chapter instructions..
+  ch8_1    - Enable Chapter instructions..
+  ch8_2    - Enable Chapter instructions..
+  ch9_1    - Enable Chapter instructions..
+  ch9_2    - Enable Chapter instructions..
+  ch9_3    - Enable Chapter instructions..
+  chall    - Enable Chapter instructions..
+  cmp      - Enable 'cmp' instructions..
+  cpu032I  - Cpu032I ISA Support.
+  cpu032II - Cpu032II ISA Support (slt).
+  slt      - Enable 'slt' instructions..
+
+Use +feature to enable a feature, or -feature to disable it.
+For example, llc -mcpu=mycpu -mattr=+feature1,-feature2
+PLEASE submit a bug report to https://bugs.llvm.org/ and include the crash backtrace.
+Stack dump:
+0.	Program arguments: /home/todd-wsl/llvm-cpu0/build/bin/llc -march=cpu0 -mcpu=help
+ #0 0x00007f1792046c01 llvm::sys::PrintStackTrace(llvm::raw_ostream&, int) (/home/todd-wsl/llvm-cpu0/build/bin/llc+0x10bbc01)
+ #1 0x00007f17920449c4 llvm::sys::RunSignalHandlers() (/home/todd-wsl/llvm-cpu0/build/bin/llc+0x10b99c4)
+ #2 0x00007f1792044b3b SignalHandler(int) (/home/todd-wsl/llvm-cpu0/build/bin/llc+0x10b9b3b)
+ #3 0x00007f1790f31420 __restore_rt (/lib/x86_64-linux-gnu/libpthread.so.0+0x14420)
+ #4 0x00007f1791433047 llvm::LLVMTargetMachine::initAsmInfo() (/home/todd-wsl/llvm-cpu0/build/bin/llc+0x4a8047)
+ #5 0x00007f17912a767c llvm::Cpu0TargetMachine::Cpu0TargetMachine(llvm::Target const&, llvm::Triple const&, llvm::StringRef, llvm::StringRef, llvm::TargetOptions const&, llvm::Optional<llvm::Reloc::Model>, llvm::Optional<llvm::CodeModel::Model>, llvm::CodeGenOpt::Level, bool, bool) (/home/todd-wsl/llvm-cpu0/build/bin/llc+0x31c67c)
+ #6 0x00007f17912a7770 llvm::RegisterTargetMachine<llvm::Cpu0ebTargetMachine>::Allocator(llvm::Target const&, llvm::Triple const&, llvm::StringRef, llvm::StringRef, llvm::TargetOptions const&, llvm::Optional<llvm::Reloc::Model>, llvm::Optional<llvm::CodeModel::Model>, llvm::CodeGenOpt::Level, bool) (/home/todd-wsl/llvm-cpu0/build/bin/llc+0x31c770)
+ #7 0x00007f179125168f main (/home/todd-wsl/llvm-cpu0/build/bin/llc+0x2c668f)
+ #8 0x00007f1790974083 __libc_start_main /build/glibc-SzIz7B/glibc-2.31/csu/../csu/libc-start.c:342:3
+ #9 0x00007f17912a195e _start (/home/todd-wsl/llvm-cpu0/build/bin/llc+0x31695e)

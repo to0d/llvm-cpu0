@@ -95,6 +95,18 @@ static MCAsmInfo *createCpu0MCAsmInfo(const MCRegisterInfo &MRI,
   return MAI;
 }
 
+namespace {
+
+class Cpu0MCInstrAnalysis : public MCInstrAnalysis {
+public:
+  Cpu0MCInstrAnalysis(const MCInstrInfo *Info) : MCInstrAnalysis(Info) {}
+};
+}
+
+static MCInstrAnalysis *createCpu0MCInstrAnalysis(const MCInstrInfo *Info) {
+  return new Cpu0MCInstrAnalysis(Info);
+}
+
 //@2 {
 extern "C" void LLVMInitializeCpu0TargetMC() {
   for (Target *T : {&TheCpu0Target, &TheCpu0elTarget}) {
@@ -110,6 +122,8 @@ extern "C" void LLVMInitializeCpu0TargetMC() {
     // Register the MC subtarget info.
     TargetRegistry::RegisterMCSubtargetInfo(*T,
 	                                        createCpu0MCSubtargetInfo);
+    // Register the MC instruction analyzer.
+    TargetRegistry::RegisterMCInstrAnalysis(*T, createCpu0MCInstrAnalysis);
   }
 
 }

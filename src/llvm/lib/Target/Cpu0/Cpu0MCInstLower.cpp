@@ -16,6 +16,7 @@
 
 #include "Cpu0AsmPrinter.h"
 #include "Cpu0InstrInfo.h"
+#include "MCTargetDesc/Cpu0BaseInfo.h"
 #include "llvm/CodeGen/MachineFunction.h"
 #include "llvm/CodeGen/MachineInstr.h"
 #include "llvm/CodeGen/MachineOperand.h"

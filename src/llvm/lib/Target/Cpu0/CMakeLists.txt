@@ -18,6 +18,7 @@ add_public_tablegen_target(Cpu0CommonTableGen)
 add_llvm_target(Cpu0CodeGen
   Cpu0FrameLowering.cpp
   Cpu0ISelLowering.cpp
+  Cpu0MachineFunction.cpp
   Cpu0SEFrameLowering.cpp
   Cpu0SEISelLowering.cpp
   Cpu0Subtarget.cpp

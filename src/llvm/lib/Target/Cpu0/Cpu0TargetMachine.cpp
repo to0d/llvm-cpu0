@@ -11,6 +11,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "Cpu0TargetMachine.h"
+#include "Cpu0.h"
+
 #include "llvm/IR/Attributes.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Support/CodeGen.h"

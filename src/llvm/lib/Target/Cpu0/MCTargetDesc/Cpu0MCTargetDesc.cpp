@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "Cpu0MCTargetDesc.h"
+#include "InstPrinter/Cpu0InstPrinter.h"
 #include "Cpu0MCAsmInfo.h"
 #include "llvm/MC/MachineLocation.h"
 #include "llvm/MC/MCELFStreamer.h"
@@ -95,6 +96,14 @@ static MCAsmInfo *createCpu0MCAsmInfo(const MCRegisterInfo &MRI,
   return MAI;
 }
 
+static MCInstPrinter *createCpu0MCInstPrinter(const Triple &T,
+                                              unsigned SyntaxVariant,
+                                              const MCAsmInfo &MAI,
+                                              const MCInstrInfo &MII,
+                                              const MCRegisterInfo &MRI) {
+  return new Cpu0InstPrinter(MAI, MII, MRI);
+}
+
 namespace {
 
 class Cpu0MCInstrAnalysis : public MCInstrAnalysis {
@@ -124,6 +133,9 @@ extern "C" void LLVMInitializeCpu0TargetMC() {
 	                                        createCpu0MCSubtargetInfo);
     // Register the MC instruction analyzer.
     TargetRegistry::RegisterMCInstrAnalysis(*T, createCpu0MCInstrAnalysis);
+    // Register the MCInstPrinter.
+    TargetRegistry::RegisterMCInstPrinter(*T,
+	                                      createCpu0MCInstPrinter);
   }
 
 }

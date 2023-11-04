@@ -37,6 +37,27 @@ using namespace llvm;
 #define GET_REGINFO_MC_DESC
 #include "Cpu0GenRegisterInfo.inc"
 
+//@1 {
+/// Select the Cpu0 Architecture Feature for the given triple and cpu name.
+/// The function will be called at command 'llvm-objdump -d' for Cpu0 elf input.
+static std::string selectCpu0ArchFeature(const Triple &TT, StringRef CPU) {
+  std::string Cpu0ArchFeature;
+  if (CPU.empty() || CPU == "generic") {
+    if (TT.getArch() == Triple::cpu0 || TT.getArch() == Triple::cpu0el) {
+      if (CPU.empty() || CPU == "cpu032II") {
+        Cpu0ArchFeature = "+cpu032II";
+      }
+      else {
+        if (CPU == "cpu032I") {
+          Cpu0ArchFeature = "+cpu032I";
+        }
+      }
+    }
+  }
+  return Cpu0ArchFeature;
+}
+//@1 }
+
 static MCInstrInfo *createCpu0MCInstrInfo() {
   MCInstrInfo *X = new MCInstrInfo();
   InitCpu0MCInstrInfo(X); // defined in Cpu0GenInstrInfo.inc
@@ -47,6 +68,19 @@ static MCRegisterInfo *createCpu0MCRegisterInfo(const Triple &TT) {
   MCRegisterInfo *X = new MCRegisterInfo();
   InitCpu0MCRegisterInfo(X, Cpu0::SW); // defined in Cpu0GenRegisterInfo.inc
   return X;
+}
+
+static MCSubtargetInfo *createCpu0MCSubtargetInfo(const Triple &TT,
+                                                  StringRef CPU, StringRef FS) {
+  std::string ArchFS = selectCpu0ArchFeature(TT,CPU);
+  if (!FS.empty()) {
+    if (!ArchFS.empty())
+      ArchFS = ArchFS + "," + FS.str();
+    else
+      ArchFS = FS.str();
+  }
+  return createCpu0MCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, ArchFS);
+// createCpu0MCSubtargetInfoImpl defined in Cpu0GenSubtargetInfo.inc
 }
 
 static MCAsmInfo *createCpu0MCAsmInfo(const MCRegisterInfo &MRI,
@@ -72,6 +106,10 @@ extern "C" void LLVMInitializeCpu0TargetMC() {
 
     // Register the MC register info.
     TargetRegistry::RegisterMCRegInfo(*T, createCpu0MCRegisterInfo);
+
+    // Register the MC subtarget info.
+    TargetRegistry::RegisterMCSubtargetInfo(*T,
+	                                        createCpu0MCSubtargetInfo);
   }
 
 }

@@ -33,14 +33,24 @@ public:
   Cpu0FunctionInfo(MachineFunction& MF)
   : MF(MF), 
     VarArgsFrameIndex(0), 
+    SRetReturnReg(0),
     EmitNOAT(false),
     MaxCallFrameSize(0)
     {}
 
   ~Cpu0FunctionInfo();
 
+  unsigned getSRetReturnReg() const { return SRetReturnReg; }
+  void setSRetReturnReg(unsigned Reg) { SRetReturnReg = Reg; }
+
   int getVarArgsFrameIndex() const { return VarArgsFrameIndex; }
   void setVarArgsFrameIndex(int Index) { VarArgsFrameIndex = Index; }
+
+  bool hasByvalArg() const { return HasByvalArg; }
+  void setFormalArgInfo(unsigned Size, bool HasByval) {
+    IncomingArgSize = Size;
+    HasByvalArg = HasByval;
+  }
 
   bool getEmitNOAT() const { return EmitNOAT; }
   void setEmitNOAT() { EmitNOAT = true; }
@@ -52,6 +62,17 @@ private:
 
     /// VarArgsFrameIndex - FrameIndex for start of varargs area.
   int VarArgsFrameIndex;
+
+  /// SRetReturnReg - Some subtargets require that sret lowering includes
+  /// returning the value of the returned struct in a register. This field
+  /// holds the virtual register into which the sret argument is passed.
+  unsigned SRetReturnReg;
+
+  /// True if function has a byval argument.
+  bool HasByvalArg;
+
+  /// Size of incoming argument area.
+  unsigned IncomingArgSize;
 
   bool EmitNOAT;
   unsigned MaxCallFrameSize;

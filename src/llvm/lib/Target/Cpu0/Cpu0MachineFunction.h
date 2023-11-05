@@ -33,7 +33,7 @@ public:
   Cpu0FunctionInfo(MachineFunction& MF)
   : MF(MF), 
     VarArgsFrameIndex(0), 
-    SRetReturnReg(0),
+    SRetReturnReg(0), CallsEhReturn(false), CallsEhDwarf(false),
     EmitNOAT(false),
     MaxCallFrameSize(0)
     {}
@@ -73,6 +73,15 @@ private:
 
   /// Size of incoming argument area.
   unsigned IncomingArgSize;
+
+  /// CallsEhReturn - Whether the function calls llvm.eh.return.
+  bool CallsEhReturn;
+
+  /// CallsEhDwarf - Whether the function calls llvm.eh.dwarf.
+  bool CallsEhDwarf;
+
+  /// Frame objects for spilling eh data registers.
+  int EhDataRegFI[2];
 
   bool EmitNOAT;
   unsigned MaxCallFrameSize;

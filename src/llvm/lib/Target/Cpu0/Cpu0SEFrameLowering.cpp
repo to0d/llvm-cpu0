@@ -13,6 +13,7 @@
 
 #include "Cpu0SEFrameLowering.h"
 
+#include "Cpu0AnalyzeImmediate.h"
 #include "Cpu0MachineFunction.h"
 #include "Cpu0SEInstrInfo.h"
 #include "Cpu0Subtarget.h"
@@ -119,6 +120,45 @@ void Cpu0SEFrameLowering::emitEpilogue(MachineFunction &MF,
 
   // Adjust stack.
   TII.adjustStackPtr(SP, StackSize, MBB, MBBI);
+}
+//}
+
+//@hasReservedCallFrame {
+bool
+Cpu0SEFrameLowering::hasReservedCallFrame(const MachineFunction &MF) const {
+  const MachineFrameInfo &MFI = MF.getFrameInfo();
+
+  // Reserve call frame if the size of the maximum call frame fits into 16-bit
+  // immediate field and there are no variable sized objects on the stack.
+  // Make sure the second register scavenger spill slot can be accessed with one
+  // instruction.
+  return isInt<16>(MFI.getMaxCallFrameSize() + getStackAlignment()) &&
+    !MFI.hasVarSizedObjects();
+}
+//}
+
+/// Mark \p Reg and all registers aliasing it in the bitset.
+static void setAliasRegs(MachineFunction &MF, BitVector &SavedRegs, unsigned Reg) {
+  const TargetRegisterInfo *TRI = MF.getSubtarget().getRegisterInfo();
+  for (MCRegAliasIterator AI(Reg, TRI, true); AI.isValid(); ++AI)
+    SavedRegs.set(*AI);
+}
+
+//@determineCalleeSaves {
+// This method is called immediately before PrologEpilogInserter scans the 
+//  physical registers used to determine what callee saved registers should be 
+//  spilled. This method is optional. 
+void Cpu0SEFrameLowering::determineCalleeSaves(MachineFunction &MF,
+                                               BitVector &SavedRegs,
+                                               RegScavenger *RS) const {
+//@determineCalleeSaves-body
+  TargetFrameLowering::determineCalleeSaves(MF, SavedRegs, RS);
+  Cpu0FunctionInfo *Cpu0FI = MF.getInfo<Cpu0FunctionInfo>();
+
+  if (MF.getFrameInfo().hasCalls())
+    setAliasRegs(MF, SavedRegs, Cpu0::LR);
+
+  return;
 }
 //}
 

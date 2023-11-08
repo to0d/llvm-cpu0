@@ -30,6 +30,20 @@ public:
 
   const Cpu0RegisterInfo &getRegisterInfo() const override;
 
+  void storeRegToStack(MachineBasicBlock &MBB,
+                       MachineBasicBlock::iterator MI,
+                       Register SrcReg, bool isKill, int FrameIndex,
+                       const TargetRegisterClass *RC,
+                       const TargetRegisterInfo *TRI,
+                       int64_t Offset) const override;
+
+  void loadRegFromStack(MachineBasicBlock &MBB,
+                        MachineBasicBlock::iterator MI,
+                        Register DestReg, int FrameIndex,
+                        const TargetRegisterClass *RC,
+                        const TargetRegisterInfo *TRI,
+                        int64_t Offset) const override;
+
 //@expandPostRAPseudo
   bool expandPostRAPseudo(MachineInstr &MI) const override;
 

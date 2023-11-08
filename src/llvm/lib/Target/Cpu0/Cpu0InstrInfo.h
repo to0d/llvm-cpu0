@@ -17,6 +17,7 @@
 #include "Cpu0Config.h"
 
 #include "Cpu0.h"
+#include "Cpu0AnalyzeImmediate.h"
 #include "Cpu0RegisterInfo.h"
 #include "llvm/CodeGen/MachineInstrBuilder.h"
 #include "llvm/CodeGen/TargetInstrInfo.h"
@@ -43,6 +44,10 @@ public:
 
   /// Return the number of bytes of code the specified instruction may be.
   unsigned GetInstSizeInBytes(const MachineInstr &MI) const;
+
+  virtual void adjustStackPtr(unsigned SP, int64_t Amount,
+                              MachineBasicBlock &MBB,
+                              MachineBasicBlock::iterator I) const = 0;
 
 protected:
 };

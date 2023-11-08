@@ -35,6 +35,63 @@ Cpu0SEFrameLowering::Cpu0SEFrameLowering(const Cpu0Subtarget &STI)
 //@emitPrologue {
 void Cpu0SEFrameLowering::emitPrologue(MachineFunction &MF,
                                        MachineBasicBlock &MBB) const {
+  MachineFrameInfo &MFI    = MF.getFrameInfo();
+  Cpu0FunctionInfo *Cpu0FI = MF.getInfo<Cpu0FunctionInfo>();
+
+  const Cpu0SEInstrInfo &TII =
+    *static_cast<const Cpu0SEInstrInfo*>(STI.getInstrInfo());
+  const Cpu0RegisterInfo &RegInfo =
+      *static_cast<const Cpu0RegisterInfo *>(STI.getRegisterInfo());
+
+  MachineBasicBlock::iterator MBBI = MBB.begin();
+  DebugLoc dl = MBBI != MBB.end() ? MBBI->getDebugLoc() : DebugLoc();
+  Cpu0ABIInfo ABI = STI.getABI();
+  unsigned SP = Cpu0::SP;
+  const TargetRegisterClass *RC = &Cpu0::GPROutRegClass;
+
+  // First, compute final stack size.
+  uint64_t StackSize = MFI.getStackSize();
+
+  // No need to allocate space on the stack.
+  if (StackSize == 0 && !MFI.adjustsStack()) return;
+
+  MachineModuleInfo &MMI = MF.getMMI();
+  const MCRegisterInfo *MRI = MMI.getContext().getRegisterInfo();
+
+  // Adjust stack.
+  TII.adjustStackPtr(SP, -StackSize, MBB, MBBI);
+
+  // emit ".cfi_def_cfa_offset StackSize"
+  unsigned CFIIndex = 
+      MF.addFrameInst(
+      MCCFIInstruction::cfiDefCfaOffset(nullptr, StackSize));
+  BuildMI(MBB, MBBI, dl, TII.get(TargetOpcode::CFI_INSTRUCTION))
+      .addCFIIndex(CFIIndex);
+
+  const std::vector<CalleeSavedInfo> &CSI = MFI.getCalleeSavedInfo();
+
+  if (!CSI.empty()) {
+    // Find the instruction past the last instruction that saves a callee-saved
+    // register to the stack.
+    for (unsigned i = 0; i < CSI.size(); ++i)
+      ++MBBI;
+
+    // Iterate over list of callee-saved registers and emit .cfi_offset
+    // directives.
+    for (std::vector<CalleeSavedInfo>::const_iterator I = CSI.begin(),
+           E = CSI.end(); I != E; ++I) {
+      int64_t Offset = MFI.getObjectOffset(I->getFrameIdx());
+      unsigned Reg = I->getReg();
+      {
+        // Reg is in CPURegs.
+        unsigned CFIIndex = MF.addFrameInst(MCCFIInstruction::createOffset(
+            nullptr, MRI->getDwarfRegNum(Reg, true), Offset));
+        BuildMI(MBB, MBBI, dl, TII.get(TargetOpcode::CFI_INSTRUCTION))
+            .addCFIIndex(CFIIndex);
+      }
+    }
+  }
+
 }
 //}
 

@@ -98,6 +98,27 @@ void Cpu0SEFrameLowering::emitPrologue(MachineFunction &MF,
 //@emitEpilogue {
 void Cpu0SEFrameLowering::emitEpilogue(MachineFunction &MF,
                                  MachineBasicBlock &MBB) const {
+  MachineBasicBlock::iterator MBBI = MBB.getFirstTerminator();
+  MachineFrameInfo &MFI            = MF.getFrameInfo();
+  Cpu0FunctionInfo *Cpu0FI = MF.getInfo<Cpu0FunctionInfo>();
+
+  const Cpu0SEInstrInfo &TII =
+      *static_cast<const Cpu0SEInstrInfo *>(STI.getInstrInfo());
+  const Cpu0RegisterInfo &RegInfo =
+      *static_cast<const Cpu0RegisterInfo *>(STI.getRegisterInfo());
+
+  DebugLoc DL = MBBI != MBB.end() ? MBBI->getDebugLoc() : DebugLoc();
+  Cpu0ABIInfo ABI = STI.getABI();
+  unsigned SP = Cpu0::SP;
+
+  // Get the number of bytes from FrameInfo
+  uint64_t StackSize = MFI.getStackSize();
+
+  if (!StackSize)
+    return;
+
+  // Adjust stack.
+  TII.adjustStackPtr(SP, StackSize, MBB, MBBI);
 }
 //}
 

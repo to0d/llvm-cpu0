@@ -314,6 +314,9 @@ let Predicates = [DisableOverflow] in {
 def ADDu    : ArithLogicR<0x11, "addu", add, IIAlu, CPURegs, 1>;
 }
 }
+let Predicates = [Ch4_1] in {
+def MUL     : ArithLogicR<0x17, "mul", mul, IIImul, CPURegs, 1>;
+}
 
 /// Shift Instructions
 let Predicates = [Ch3_5] in {

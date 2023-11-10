@@ -322,6 +322,7 @@ def SHL     : shift_rotate_imm32<0x1e, 0x00, "shl", shl>;
 let Predicates = [Ch4_1] in {
 // srl is IR node for lshr llvm IR instruction of .bc
 def SRAV    : shift_rotate_reg<0x21, 0x00, "srav", sra, CPURegs>;
+def SHLV    : shift_rotate_reg<0x22, 0x00, "shlv", shl, CPURegs>;
 def SHRV    : shift_rotate_reg<0x23, 0x00, "shrv", srl, CPURegs>;
 }
 

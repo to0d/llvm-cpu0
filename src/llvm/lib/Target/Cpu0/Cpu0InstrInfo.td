@@ -315,6 +315,9 @@ def ADDu    : ArithLogicR<0x11, "addu", add, IIAlu, CPURegs, 1>;
 }
 }
 let Predicates = [Ch4_1] in {
+let Predicates = [DisableOverflow] in {
+def SUBu    : ArithLogicR<0x12, "subu", sub, IIAlu, CPURegs>;
+}
 def MUL     : ArithLogicR<0x17, "mul", mul, IIImul, CPURegs, 1>;
 }
 

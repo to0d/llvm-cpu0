@@ -207,6 +207,16 @@ class shift_rotate_imm32<bits<8> op, bits<4> isRotate, string instr_asm,
   shift_rotate_imm<op, isRotate, instr_asm, OpNode, immZExt5, shamt, CPURegs>;
 }
 
+let Predicates = [Ch4_1] in {
+class shift_rotate_reg<bits<8> op, bits<4> isRotate, string instr_asm,
+                       SDNode OpNode, RegisterClass RC>:
+  FA<op, (outs GPROut:$ra), (ins RC:$rb, RC:$rc),
+     !strconcat(instr_asm, "\t$ra, $rb, $rc"),
+     [(set GPROut:$ra, (OpNode RC:$rb, RC:$rc))], IIAlu> {
+  let shamt = 0;
+}
+}
+
 let Predicates = [Ch3_5] in {
 // Load Upper Imediate
 class LoadUpper<bits<8> op, string instr_asm, RegisterClass RC, Operand Imm>:
@@ -308,6 +318,10 @@ def ADDu    : ArithLogicR<0x11, "addu", add, IIAlu, CPURegs, 1>;
 /// Shift Instructions
 let Predicates = [Ch3_5] in {
 def SHL     : shift_rotate_imm32<0x1e, 0x00, "shl", shl>;
+}
+let Predicates = [Ch4_1] in {
+// srl is IR node for lshr llvm IR instruction of .bc
+def SRAV    : shift_rotate_reg<0x21, 0x00, "srav", sra, CPURegs>;
 }
 
 def JR      : JumpFR<0x3c, "jr", GPROut>;

@@ -284,6 +284,48 @@ class RetBase<RegisterClass RC>: JumpFR<0x3c, "ret", RC> {
   let hasExtraSrcRegAllocReq = 1;
 }
 
+let Predicates = [Ch4_1] in {
+// Mul, Div
+class Mult<bits<8> op, string instr_asm, InstrItinClass itin,
+           RegisterClass RC, list<Register> DefRegs>:
+  FA<op, (outs), (ins RC:$ra, RC:$rb),
+     !strconcat(instr_asm, "\t$ra, $rb"), [], itin> {
+  let rc = 0;
+  let shamt = 0;
+  let isCommutable = 1;
+  let Defs = DefRegs;
+  let hasSideEffects = 0;
+}
+
+class Mult32<bits<8> op, string instr_asm, InstrItinClass itin>:
+  Mult<op, instr_asm, itin, CPURegs, [HI, LO]>;
+
+// Move from Lo/Hi
+class MoveFromLOHI<bits<8> op, string instr_asm, RegisterClass RC,
+                   list<Register> UseRegs>:
+  FA<op, (outs RC:$ra), (ins),
+     !strconcat(instr_asm, "\t$ra"), [], IIHiLo> {
+  let rb = 0;
+  let rc = 0;
+  let shamt = 0;
+  let Uses = UseRegs;
+  let hasSideEffects = 0;
+}
+
+// Move to Lo/Hi
+class MoveToLOHI<bits<8> op, string instr_asm, RegisterClass RC,
+                 list<Register> DefRegs>:
+  FA<op, (outs), (ins RC:$ra),
+     !strconcat(instr_asm, "\t$ra"), [], IIHiLo> {
+  let rb = 0;
+  let rc = 0;
+  let shamt = 0;
+  let Defs = DefRegs;
+  let hasSideEffects = 0;
+}
+
+} // let Predicates = [Ch4_1]
+
   
 //===----------------------------------------------------------------------===//
 // Instruction definition
@@ -340,6 +382,18 @@ let isReturn=1, isTerminator=1, hasDelaySlot=1, isBarrier=1, hasCtrlDep=1 in
 }
 
 def RET     : RetBase<GPROut>;
+
+let Predicates = [Ch4_1] in {
+/// Multiply and Divide Instructions.
+def MULT    : Mult32<0x41, "mult", IIImul>;
+def MULTu   : Mult32<0x42, "multu", IIImul>;
+
+def MFHI    : MoveFromLOHI<0x46, "mfhi", CPURegs, [HI]>;
+def MFLO    : MoveFromLOHI<0x47, "mflo", CPURegs, [LO]>;
+def MTHI    : MoveToLOHI<0x48, "mthi", CPURegs, [HI]>;
+def MTLO    : MoveToLOHI<0x49, "mtlo", CPURegs, [LO]>;
+
+}
 
 /// No operation
 let addr=0 in

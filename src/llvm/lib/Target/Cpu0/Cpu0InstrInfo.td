@@ -16,10 +16,18 @@
 //===----------------------------------------------------------------------===//
 
 def SDT_Cpu0Ret          : SDTypeProfile<0, 1, [SDTCisInt<0>]>;
+// Only op DAG can be disabled by ch4_1, data DAG cannot.
+def SDT_Cpu0DivRem       : SDTypeProfile<0, 2,
+                                         [SDTCisInt<0>,
+                                          SDTCisSameAs<0, 1>]>;
 
 // Return
 def Cpu0Ret : SDNode<"Cpu0ISD::Ret", SDTNone,
                      [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
+
+// DivRem(u) nodes
+def Cpu0DivRem    : SDNode<"Cpu0ISD::DivRem", SDT_Cpu0DivRem,
+                           [SDNPOutGlue]>;
 
 //===----------------------------------------------------------------------===//
 // Cpu0 Instruction Predicate Definitions.
@@ -300,6 +308,19 @@ class Mult<bits<8> op, string instr_asm, InstrItinClass itin,
 class Mult32<bits<8> op, string instr_asm, InstrItinClass itin>:
   Mult<op, instr_asm, itin, CPURegs, [HI, LO]>;
 
+class Div<SDNode opNode, bits<8> op, string instr_asm, InstrItinClass itin,
+          RegisterClass RC, list<Register> DefRegs>:
+  FA<op, (outs), (ins RC:$ra, RC:$rb),
+     !strconcat(instr_asm, "\t$ra, $rb"),
+     [(opNode RC:$ra, RC:$rb)], itin> {
+  let rc = 0;
+  let shamt = 0;
+  let Defs = DefRegs;
+}
+
+class Div32<SDNode opNode, bits<8> op, string instr_asm, InstrItinClass itin>:
+  Div<opNode, op, instr_asm, itin, CPURegs, [HI, LO]>;
+
 // Move from Lo/Hi
 class MoveFromLOHI<bits<8> op, string instr_asm, RegisterClass RC,
                    list<Register> UseRegs>:
@@ -387,6 +408,7 @@ let Predicates = [Ch4_1] in {
 /// Multiply and Divide Instructions.
 def MULT    : Mult32<0x41, "mult", IIImul>;
 def MULTu   : Mult32<0x42, "multu", IIImul>;
+def SDIV    : Div32<Cpu0DivRem, 0x43, "div", IIIdiv>;
 
 def MFHI    : MoveFromLOHI<0x46, "mfhi", CPURegs, [HI]>;
 def MFLO    : MoveFromLOHI<0x47, "mflo", CPURegs, [LO]>;

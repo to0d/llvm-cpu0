@@ -63,6 +63,8 @@ Cpu0TargetLowering::Cpu0TargetLowering(const Cpu0TargetMachine &TM,
 
   // Cpu0 Custom Operations
 
+  setOperationAction(ISD::SREM, MVT::i32, Expand);
+
   // Operations not directly supported by Cpu0.
 
 //- Set .align 2

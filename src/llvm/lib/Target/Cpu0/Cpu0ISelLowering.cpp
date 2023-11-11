@@ -67,6 +67,8 @@ Cpu0TargetLowering::Cpu0TargetLowering(const Cpu0TargetMachine &TM,
 
   // Operations not directly supported by Cpu0.
 
+  setTargetDAGCombine(ISD::SDIVREM);
+
 //- Set .align 2
 // It will emit .align 2 later
   setMinFunctionAlignment(Align(2));

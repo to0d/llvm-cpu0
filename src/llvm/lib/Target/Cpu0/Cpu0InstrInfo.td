@@ -381,6 +381,10 @@ let Predicates = [Ch4_1] in {
 let Predicates = [DisableOverflow] in {
 def SUBu    : ArithLogicR<0x12, "subu", sub, IIAlu, CPURegs>;
 }
+let Predicates = [EnableOverflow] in {
+def ADD     : ArithLogicR<0x13, "add", add, IIAlu, CPURegs, 1>;
+def SUB     : ArithLogicR<0x14, "sub", sub, IIAlu, CPURegs>;
+}
 def MUL     : ArithLogicR<0x17, "mul", mul, IIImul, CPURegs, 1>;
 }
 

@@ -37,6 +37,7 @@ class raw_pwrite_stream;
 extern Target TheCpu0Target;
 extern Target TheCpu0elTarget;
 
+std::unique_ptr<MCObjectTargetWriter> createCpu0ELFObjectWriter(const Triple &TT);
 } // End llvm namespace
 
 // Defines symbolic names for Cpu0 registers.  This defines a mapping from

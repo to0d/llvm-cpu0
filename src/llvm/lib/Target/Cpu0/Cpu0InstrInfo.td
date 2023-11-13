@@ -385,6 +385,10 @@ def MUL     : ArithLogicR<0x17, "mul", mul, IIImul, CPURegs, 1>;
 }
 
 /// Shift Instructions
+let Predicates = [Ch4_1] in {
+// sra is IR node for ashr llvm IR instruction of .bc
+def ROL     : shift_rotate_imm32<0x1c, 0x01, "rol", rotl>;
+}
 let Predicates = [Ch3_5] in {
 def SHL     : shift_rotate_imm32<0x1e, 0x00, "shl", shl>;
 }

@@ -94,6 +94,16 @@ bool Cpu0SEDAGToDAGISel::trySelect(SDNode *Node) {
     return true;
   }
 
+  case ISD::Constant: {
+    const ConstantSDNode *CN = dyn_cast<ConstantSDNode>(Node);
+    unsigned Size = CN->getValueSizeInBits(0);
+
+    if (Size == 32)
+      break;
+
+    return true;
+  }
+
   }
 
   return false;

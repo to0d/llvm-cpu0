@@ -28,6 +28,8 @@ def Cpu0Ret : SDNode<"Cpu0ISD::Ret", SDTNone,
 // DivRem(u) nodes
 def Cpu0DivRem    : SDNode<"Cpu0ISD::DivRem", SDT_Cpu0DivRem,
                            [SDNPOutGlue]>;
+def Cpu0DivRemU   : SDNode<"Cpu0ISD::DivRemU", SDT_Cpu0DivRem,
+                           [SDNPOutGlue]>;
 
 //===----------------------------------------------------------------------===//
 // Cpu0 Instruction Predicate Definitions.
@@ -210,6 +212,15 @@ class ArithLogicI<bits<8> op, string instr_asm, SDNode OpNode,
   let isReMaterializable = 1;
 }
 
+//  Logical
+class LogicNOR<bits<8> op, string instr_asm, RegisterClass RC>:
+  FA<op, (outs RC:$ra), (ins RC:$rb, RC:$rc),
+     !strconcat(instr_asm, "\t$ra, $rb, $rc"),
+     [(set RC:$ra, (not (or RC:$rb, RC:$rc)))], IIAlu> {
+  let shamt = 0;
+  let isCommutable = 1;
+}
+
 let Predicates = [Ch3_5] in {
 // Shifts
 class shift_rotate_imm<bits<8> op, bits<4> isRotate, string instr_asm,
@@ -295,6 +306,14 @@ class SetCC_R<bits<8> op, string instr_asm, PatFrag cond_op,
      IIAlu>, Requires<[HasSlt]> {
   let shamt = 0;
 }
+
+class SetCC_I<bits<8> op, string instr_asm, PatFrag cond_op, Operand Od,
+              PatLeaf imm_type, RegisterClass RC>:
+  FL<op, (outs GPROut:$ra), (ins RC:$rb, Od:$imm16),
+     !strconcat(instr_asm, "\t$ra, $rb, $imm16"),
+     [(set GPROut:$ra, (cond_op RC:$rb, imm_type:$imm16))],
+     IIAlu>, Requires<[HasSlt]> {
+}
 }
 
 //@JumpFR {
@@ -369,6 +388,32 @@ class MoveToLOHI<bits<8> op, string instr_asm, RegisterClass RC,
   let hasSideEffects = 0;
 }
 
+// Move from C0 (co-processor 0) Register
+class MoveFromC0<bits<8> op, string instr_asm, RegisterClass RC>:
+  FA<op, (outs), (ins RC:$ra, C0Regs:$rb),
+     !strconcat(instr_asm, "\t$ra, $rb"), [], IIAlu> {
+  let rc = 0;
+  let shamt = 0;
+  let hasSideEffects = 0;
+}
+
+// Move to C0 Register
+class MoveToC0<bits<8> op, string instr_asm, RegisterClass RC>:
+  FA<op, (outs C0Regs:$ra), (ins RC:$rb),
+     !strconcat(instr_asm, "\t$ra, $rb"), [], IIAlu> {
+  let rc = 0;
+  let shamt = 0;
+  let hasSideEffects = 0;
+}
+
+// Move from C0 register to C0 register
+class C0Move<bits<8> op, string instr_asm>:
+  FA<op, (outs C0Regs:$ra), (ins C0Regs:$rb),
+     !strconcat(instr_asm, "\t$ra, $rb"), [], IIAlu> {
+  let rc = 0;
+  let shamt = 0;
+  let hasSideEffects = 0;
+}
 } // let Predicates = [Ch4_1]
 
   
@@ -405,6 +450,7 @@ def LUi     : LoadUpper<0x0F, "lui", GPROut, uimm16>;
 let Predicates = [Ch4_2] in {
 let Predicates = [HasCmp] in {
 def CMP     : CmpInstr<0x2A, "cmp", IIAlu, CPURegs, SR, 0>;
+def CMPu    : CmpInstr<0x2B, "cmpu", IIAlu, CPURegs, SR, 0>;
 }
 }
 let Predicates = [Ch3_5] in {
@@ -426,12 +472,14 @@ let Predicates = [Ch4_2] in {
 def AND     : ArithLogicR<0x18, "and", and, IIAlu, CPURegs, 1>;
 def OR      : ArithLogicR<0x19, "or", or, IIAlu, CPURegs, 1>;
 def XOR     : ArithLogicR<0x1a, "xor", xor, IIAlu, CPURegs, 1>;
+def NOR     : LogicNOR<0x1b, "nor", CPURegs>;
 }
 
 /// Shift Instructions
 let Predicates = [Ch4_1] in {
 // sra is IR node for ashr llvm IR instruction of .bc
 def ROL     : shift_rotate_imm32<0x1c, 0x01, "rol", rotl>;
+def ROR     : shift_rotate_imm32<0x1d, 0x01, "ror", rotr>;
 }
 let Predicates = [Ch3_5] in {
 def SHL     : shift_rotate_imm32<0x1e, 0x00, "shl", shl>;
@@ -439,13 +487,18 @@ def SHL     : shift_rotate_imm32<0x1e, 0x00, "shl", shl>;
 let Predicates = [Ch4_1] in {
 // srl is IR node for lshr llvm IR instruction of .bc
 def SHR     : shift_rotate_imm32<0x1f, 0x00, "shr", srl>;
+def SRA     : shift_rotate_imm32<0x20, 0x00, "sra", sra>;
 def SRAV    : shift_rotate_reg<0x21, 0x00, "srav", sra, CPURegs>;
 def SHLV    : shift_rotate_reg<0x22, 0x00, "shlv", shl, CPURegs>;
 def SHRV    : shift_rotate_reg<0x23, 0x00, "shrv", srl, CPURegs>;
+def ROLV    : shift_rotate_reg<0x24, 0x01, "rolv", rotl, CPURegs>;
+def RORV    : shift_rotate_reg<0x25, 0x01, "rorv", rotr, CPURegs>;
 }
 
 let Predicates = [Ch4_2] in {
 let Predicates = [HasSlt] in {
+def SLTi    : SetCC_I<0x26, "slti", setlt, simm16, immSExt16, CPURegs>;
+def SLTiu   : SetCC_I<0x27, "sltiu", setult, simm16, immSExt16, CPURegs>;
 def SLT     : SetCC_R<0x28, "slt", setlt, CPURegs>;
 def SLTu    : SetCC_R<0x29, "sltu", setult, CPURegs>;
 }
@@ -465,12 +518,17 @@ let Predicates = [Ch4_1] in {
 def MULT    : Mult32<0x41, "mult", IIImul>;
 def MULTu   : Mult32<0x42, "multu", IIImul>;
 def SDIV    : Div32<Cpu0DivRem, 0x43, "div", IIIdiv>;
+def UDIV    : Div32<Cpu0DivRemU, 0x44, "divu", IIIdiv>;
 
 def MFHI    : MoveFromLOHI<0x46, "mfhi", CPURegs, [HI]>;
 def MFLO    : MoveFromLOHI<0x47, "mflo", CPURegs, [LO]>;
 def MTHI    : MoveToLOHI<0x48, "mthi", CPURegs, [HI]>;
 def MTLO    : MoveToLOHI<0x49, "mtlo", CPURegs, [LO]>;
 
+def MFC0    : MoveFromC0<0x50, "mfc0", CPURegs>;
+def MTC0    : MoveToC0<0x51, "mtc0", CPURegs>;
+
+def C0MOVE  : C0Move<0x52, "c0mov">;
 }
 
 /// No operation
@@ -503,6 +561,12 @@ def : Pat<(i32 imm:$imm),
           (ORi (LUi (HI16 imm:$imm)), (LO16 imm:$imm))>;
 } // let Predicates = [Ch3_4]
 
+let Predicates = [Ch4_2] in {
+def : Pat<(not CPURegs:$in),
+// 1's complement of in, ex. not(0xf000000f) == 0x0ffffff0
+          (NOR CPURegs:$in, ZERO)>;
+}
+
 // setcc patterns
 
 let Predicates = [Ch4_2] in {
@@ -514,6 +578,55 @@ multiclass SeteqPatsCmp<RegisterClass RC> {
 // a != b
   def : Pat<(setne RC:$lhs, RC:$rhs),
             (XORi (SHR (ANDi (CMP RC:$lhs, RC:$rhs), 2), 1), 1)>;
+}
+
+// a < b
+multiclass SetltPatsCmp<RegisterClass RC> {
+  def : Pat<(setlt RC:$lhs, RC:$rhs),
+            (ANDi (CMP RC:$lhs, RC:$rhs), 1)>;
+// if cpu0  `define N    `SW[31]  instead of `SW[0] // Negative flag, then need
+// 2 more instructions as follows,
+//          (XORi (ANDi (SHR (CMP RC:$lhs, RC:$rhs), (LUi 0x8000), 31), 1), 1)>;
+  def : Pat<(setult RC:$lhs, RC:$rhs),
+            (ANDi (CMPu RC:$lhs, RC:$rhs), 1)>;
+}
+
+// a <= b
+multiclass SetlePatsCmp<RegisterClass RC> {
+  def : Pat<(setle RC:$lhs, RC:$rhs),
+// a <= b is equal to (XORi (b < a), 1)
+            (XORi (ANDi (CMP RC:$rhs, RC:$lhs), 1), 1)>;
+  def : Pat<(setule RC:$lhs, RC:$rhs),
+            (XORi (ANDi (CMP RC:$rhs, RC:$lhs), 1), 1)>;
+}
+
+// a > b
+multiclass SetgtPatsCmp<RegisterClass RC> {
+  def : Pat<(setgt RC:$lhs, RC:$rhs),
+// a > b is equal to b < a is equal to setlt(b, a)
+            (ANDi (CMP RC:$rhs, RC:$lhs), 1)>;
+  def : Pat<(setugt RC:$lhs, RC:$rhs),
+            (ANDi (CMPu RC:$rhs, RC:$lhs), 1)>;
+}
+
+// a >= b
+multiclass SetgePatsCmp<RegisterClass RC> {
+  def : Pat<(setge RC:$lhs, RC:$rhs),
+// a >= b is equal to b <= a
+            (XORi (ANDi (CMP RC:$lhs, RC:$rhs), 1), 1)>;
+  def : Pat<(setuge RC:$lhs, RC:$rhs),
+            (XORi (ANDi (CMPu RC:$lhs, RC:$rhs), 1), 1)>;
+}
+
+// setcc for slt instruction
+multiclass SeteqPatsSlt<RegisterClass RC, Instruction SLTiuOp, Instruction XOROp,
+                     Instruction SLTuOp, Register ZEROReg> {
+// a == b
+  def : Pat<(seteq RC:$lhs, RC:$rhs),
+                (SLTiuOp (XOROp RC:$lhs, RC:$rhs), 1)>;
+// a != b
+  def : Pat<(setne RC:$lhs, RC:$rhs),
+                (SLTuOp ZEROReg, (XOROp RC:$lhs, RC:$rhs))>;
 }
 
 // a <= b
@@ -543,14 +656,28 @@ multiclass SetgePatsSlt<RegisterClass RC, Instruction SLTOp, Instruction SLTuOp>
                 (XORi (SLTuOp RC:$lhs, RC:$rhs), 1)>;
 }
 
+multiclass SetgeImmPatsSlt<RegisterClass RC, Instruction SLTiOp,
+                        Instruction SLTiuOp> {
+  def : Pat<(setge RC:$lhs, immSExt16:$rhs),
+                (XORi (SLTiOp RC:$lhs, immSExt16:$rhs), 1)>;
+  def : Pat<(setuge RC:$lhs, immSExt16:$rhs),
+                (XORi (SLTiuOp RC:$lhs, immSExt16:$rhs), 1)>;
+}
+
 let Predicates = [HasSlt] in {
+defm : SeteqPatsSlt<CPURegs, SLTiu, XOR, SLTu, ZERO>;
 defm : SetlePatsSlt<CPURegs, SLT, SLTu>;
 defm : SetgtPatsSlt<CPURegs, SLT, SLTu>;
 defm : SetgePatsSlt<CPURegs, SLT, SLTu>;
+defm : SetgeImmPatsSlt<CPURegs, SLTi, SLTiu>;
 }
 
 let Predicates = [HasCmp] in {
 defm : SeteqPatsCmp<CPURegs>;
+defm : SetltPatsCmp<CPURegs>;
+defm : SetlePatsCmp<CPURegs>;
+defm : SetgtPatsCmp<CPURegs>;
+defm : SetgePatsCmp<CPURegs>;
 }
 } // let Predicates = [Ch4_2]
 

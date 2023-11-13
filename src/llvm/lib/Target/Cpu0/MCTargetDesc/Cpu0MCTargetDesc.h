@@ -37,6 +37,11 @@ class raw_pwrite_stream;
 extern Target TheCpu0Target;
 extern Target TheCpu0elTarget;
 
+MCAsmBackend *createCpu0AsmBackend(const Target &T,
+                                   const MCSubtargetInfo &STI,
+                                   const MCRegisterInfo &MRI,
+                                   const MCTargetOptions &Options);
+
 std::unique_ptr<MCObjectTargetWriter> createCpu0ELFObjectWriter(const Triple &TT);
 } // End llvm namespace
 

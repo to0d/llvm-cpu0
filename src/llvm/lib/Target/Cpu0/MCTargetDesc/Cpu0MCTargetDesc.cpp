@@ -151,6 +151,9 @@ extern "C" void LLVMInitializeCpu0TargetMC() {
     // Register the asm target streamer.
     TargetRegistry::RegisterAsmTargetStreamer(*T, createCpu0AsmTargetStreamer);
 
+    // Register the asm backend.
+    TargetRegistry::RegisterMCAsmBackend(*T, createCpu0AsmBackend);
+
     // Register the MC subtarget info.
     TargetRegistry::RegisterMCSubtargetInfo(*T,
 	                                        createCpu0MCSubtargetInfo);

@@ -387,6 +387,11 @@ def SUB     : ArithLogicR<0x14, "sub", sub, IIAlu, CPURegs>;
 }
 def MUL     : ArithLogicR<0x17, "mul", mul, IIImul, CPURegs, 1>;
 }
+let Predicates = [Ch4_2] in {
+def AND     : ArithLogicR<0x18, "and", and, IIAlu, CPURegs, 1>;
+def OR      : ArithLogicR<0x19, "or", or, IIAlu, CPURegs, 1>;
+def XOR     : ArithLogicR<0x1a, "xor", xor, IIAlu, CPURegs, 1>;
+}
 
 /// Shift Instructions
 let Predicates = [Ch4_1] in {

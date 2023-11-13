@@ -14,6 +14,7 @@
 #include "Cpu0MCTargetDesc.h"
 #include "InstPrinter/Cpu0InstPrinter.h"
 #include "Cpu0MCAsmInfo.h"
+#include "Cpu0TargetStreamer.h"
 #include "llvm/MC/MachineLocation.h"
 #include "llvm/MC/MCELFStreamer.h"
 #include "llvm/MC/MCInstrAnalysis.h"
@@ -125,6 +126,13 @@ static MCStreamer *createMCStreamer(const Triple &TT, MCContext &Context,
                            std::move(Emitter), RelaxAll);;
 }
 
+static MCTargetStreamer *createCpu0AsmTargetStreamer(MCStreamer &S,
+                                                     formatted_raw_ostream &OS,
+                                                     MCInstPrinter *InstPrint,
+                                                     bool isVerboseAsm) {
+  return new Cpu0TargetAsmStreamer(S, OS);
+}
+
 //@2 {
 extern "C" void LLVMInitializeCpu0TargetMC() {
   for (Target *T : {&TheCpu0Target, &TheCpu0elTarget}) {
@@ -139,6 +147,9 @@ extern "C" void LLVMInitializeCpu0TargetMC() {
 
      // Register the elf streamer.
     TargetRegistry::RegisterELFStreamer(*T, createMCStreamer);
+
+    // Register the asm target streamer.
+    TargetRegistry::RegisterAsmTargetStreamer(*T, createCpu0AsmTargetStreamer);
 
     // Register the MC subtarget info.
     TargetRegistry::RegisterMCSubtargetInfo(*T,

@@ -189,6 +189,18 @@ class ArithLogicR<bits<8> op, string instr_asm, SDNode OpNode,
 }
 }
 
+let Predicates = [Ch4_2] in {
+class CmpInstr<bits<8> op, string instr_asm, 
+               InstrItinClass itin, RegisterClass RC, RegisterClass RD, 
+               bit isComm = 0>:
+  FA<op, (outs RD:$ra), (ins RC:$rb, RC:$rc),
+     !strconcat(instr_asm, "\t$ra, $rb, $rc"), [], itin> {
+  let shamt = 0;
+  let isCommutable = isComm;
+  let Predicates = [HasCmp];
+}
+}
+
 // Arithmetic and logical instructions with 2 register operands.
 class ArithLogicI<bits<8> op, string instr_asm, SDNode OpNode,
                   Operand Od, PatLeaf imm_type, RegisterClass RC> :
@@ -364,14 +376,25 @@ def ST     : StoreM32<0x02, "st",  store_a>;
 /// Arithmetic Instructions (ALU Immediate)
 // IR "add" defined in include/llvm/Target/TargetSelectionDAG.td, line 315 (def add).
 def ADDiu   : ArithLogicI<0x09, "addiu", add, simm16, immSExt16, CPURegs>;
+let Predicates = [Ch4_2] in {
+def ANDi    : ArithLogicI<0x0c, "andi", and, uimm16, immZExt16, CPURegs>;
+}
 let Predicates = [Ch3_5] in {
 def ORi     : ArithLogicI<0x0d, "ori", or, uimm16, immZExt16, CPURegs>;
+}
+let Predicates = [Ch4_2] in {
+def XORi    : ArithLogicI<0x0e, "xori", xor, uimm16, immZExt16, CPURegs>;
 }
 let Predicates = [Ch3_5] in {
 def LUi     : LoadUpper<0x0F, "lui", GPROut, uimm16>;
 }
 
 /// Arithmetic Instructions (3-Operand, R-Type)
+let Predicates = [Ch4_2] in {
+let Predicates = [HasCmp] in {
+def CMP     : CmpInstr<0x2A, "cmp", IIAlu, CPURegs, SR, 0>;
+}
+}
 let Predicates = [Ch3_5] in {
 let Predicates = [DisableOverflow] in {
 def ADDu    : ArithLogicR<0x11, "addu", add, IIAlu, CPURegs, 1>;
@@ -403,6 +426,7 @@ def SHL     : shift_rotate_imm32<0x1e, 0x00, "shl", shl>;
 }
 let Predicates = [Ch4_1] in {
 // srl is IR node for lshr llvm IR instruction of .bc
+def SHR     : shift_rotate_imm32<0x1f, 0x00, "shr", srl>;
 def SRAV    : shift_rotate_reg<0x21, 0x00, "srav", sra, CPURegs>;
 def SHLV    : shift_rotate_reg<0x22, 0x00, "shlv", shl, CPURegs>;
 def SHRV    : shift_rotate_reg<0x23, 0x00, "shrv", srl, CPURegs>;
@@ -459,4 +483,22 @@ def : Pat<(i32 immLow16Zero:$in),
 def : Pat<(i32 imm:$imm),
           (ORi (LUi (HI16 imm:$imm)), (LO16 imm:$imm))>;
 } // let Predicates = [Ch3_4]
+
+// setcc patterns
+
+let Predicates = [Ch4_2] in {
+// setcc for cmp instruction
+multiclass SeteqPatsCmp<RegisterClass RC> {
+// a == b
+  def : Pat<(seteq RC:$lhs, RC:$rhs),
+            (SHR (ANDi (CMP RC:$lhs, RC:$rhs), 2), 1)>;
+// a != b
+  def : Pat<(setne RC:$lhs, RC:$rhs),
+            (XORi (SHR (ANDi (CMP RC:$lhs, RC:$rhs), 2), 1), 1)>;
+}
+
+let Predicates = [HasCmp] in {
+defm : SeteqPatsCmp<CPURegs>;
+}
+} // let Predicates = [Ch4_2]
 

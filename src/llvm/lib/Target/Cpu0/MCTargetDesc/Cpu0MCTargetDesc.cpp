@@ -116,6 +116,15 @@ static MCInstrAnalysis *createCpu0MCInstrAnalysis(const MCInstrInfo *Info) {
   return new Cpu0MCInstrAnalysis(Info);
 }
 
+static MCStreamer *createMCStreamer(const Triple &TT, MCContext &Context,
+                                    std::unique_ptr<MCAsmBackend> &&MAB,
+                                    std::unique_ptr<MCObjectWriter> &&OW,
+                                    std::unique_ptr<MCCodeEmitter> &&Emitter,
+                                    bool RelaxAll) {
+  return createELFStreamer(Context, std::move(MAB), std::move(OW),
+                           std::move(Emitter), RelaxAll);;
+}
+
 //@2 {
 extern "C" void LLVMInitializeCpu0TargetMC() {
   for (Target *T : {&TheCpu0Target, &TheCpu0elTarget}) {
@@ -127,6 +136,9 @@ extern "C" void LLVMInitializeCpu0TargetMC() {
 
     // Register the MC register info.
     TargetRegistry::RegisterMCRegInfo(*T, createCpu0MCRegisterInfo);
+
+     // Register the elf streamer.
+    TargetRegistry::RegisterELFStreamer(*T, createMCStreamer);
 
     // Register the MC subtarget info.
     TargetRegistry::RegisterMCSubtargetInfo(*T,

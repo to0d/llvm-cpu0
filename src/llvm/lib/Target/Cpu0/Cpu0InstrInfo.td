@@ -516,6 +516,15 @@ multiclass SeteqPatsCmp<RegisterClass RC> {
             (XORi (SHR (ANDi (CMP RC:$lhs, RC:$rhs), 2), 1), 1)>;
 }
 
+// a > b
+multiclass SetgtPatsSlt<RegisterClass RC, Instruction SLTOp, Instruction SLTuOp> {
+  def : Pat<(setgt RC:$lhs, RC:$rhs),
+// a > b is equal to b < a is equal to setlt(b, a)
+                (SLTOp RC:$rhs, RC:$lhs)>;
+  def : Pat<(setugt RC:$lhs, RC:$rhs),
+                (SLTuOp RC:$rhs, RC:$lhs)>;
+}
+
 // a >= b
 multiclass SetgePatsSlt<RegisterClass RC, Instruction SLTOp, Instruction SLTuOp> {
   def : Pat<(setge RC:$lhs, RC:$rhs),
@@ -526,6 +535,7 @@ multiclass SetgePatsSlt<RegisterClass RC, Instruction SLTOp, Instruction SLTuOp>
 }
 
 let Predicates = [HasSlt] in {
+defm : SetgtPatsSlt<CPURegs, SLT, SLTu>;
 defm : SetgePatsSlt<CPURegs, SLT, SLTu>;
 }
 

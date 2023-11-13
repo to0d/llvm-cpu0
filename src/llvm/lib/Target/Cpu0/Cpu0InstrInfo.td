@@ -285,6 +285,18 @@ class StoreM32<bits<8> op, string instr_asm, PatFrag OpNode,
   : StoreM<op, instr_asm, OpNode, GPROut, mem, Pseudo> {
 }
 
+// SetCC
+let Predicates = [Ch4_2] in {
+class SetCC_R<bits<8> op, string instr_asm, PatFrag cond_op,
+              RegisterClass RC>:
+  FA<op, (outs GPROut:$ra), (ins RC:$rb, RC:$rc),
+     !strconcat(instr_asm, "\t$ra, $rb, $rc"),
+     [(set GPROut:$ra, (cond_op RC:$rb, RC:$rc))],
+     IIAlu>, Requires<[HasSlt]> {
+  let shamt = 0;
+}
+}
+
 //@JumpFR {
 let isBranch=1, isTerminator=1, isBarrier=1, imm16=0, hasDelaySlot = 1,
     isIndirectBranch = 1 in
@@ -432,6 +444,13 @@ def SHLV    : shift_rotate_reg<0x22, 0x00, "shlv", shl, CPURegs>;
 def SHRV    : shift_rotate_reg<0x23, 0x00, "shrv", srl, CPURegs>;
 }
 
+let Predicates = [Ch4_2] in {
+let Predicates = [HasSlt] in {
+def SLT     : SetCC_R<0x28, "slt", setlt, CPURegs>;
+def SLTu    : SetCC_R<0x29, "sltu", setult, CPURegs>;
+}
+}
+
 def JR      : JumpFR<0x3c, "jr", GPROut>;
 
 let Predicates = [Ch3_4] in {
@@ -495,6 +514,19 @@ multiclass SeteqPatsCmp<RegisterClass RC> {
 // a != b
   def : Pat<(setne RC:$lhs, RC:$rhs),
             (XORi (SHR (ANDi (CMP RC:$lhs, RC:$rhs), 2), 1), 1)>;
+}
+
+// a >= b
+multiclass SetgePatsSlt<RegisterClass RC, Instruction SLTOp, Instruction SLTuOp> {
+  def : Pat<(setge RC:$lhs, RC:$rhs),
+// a >= b is equal to b <= a
+                (XORi (SLTOp RC:$lhs, RC:$rhs), 1)>;
+  def : Pat<(setuge RC:$lhs, RC:$rhs),
+                (XORi (SLTuOp RC:$lhs, RC:$rhs), 1)>;
+}
+
+let Predicates = [HasSlt] in {
+defm : SetgePatsSlt<CPURegs, SLT, SLTu>;
 }
 
 let Predicates = [HasCmp] in {

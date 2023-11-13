@@ -22,6 +22,10 @@ bool FixGlobalBaseReg;
 
 Cpu0FunctionInfo::~Cpu0FunctionInfo() {}
 
+unsigned Cpu0FunctionInfo::getGlobalBaseReg() {
+  return GlobalBaseReg = Cpu0::GP;
+}
+
 void Cpu0FunctionInfo::createEhDataRegsFI() {
   const TargetRegisterInfo &TRI = *MF.getSubtarget().getRegisterInfo();
   for (int I = 0; I < 2; ++I) {

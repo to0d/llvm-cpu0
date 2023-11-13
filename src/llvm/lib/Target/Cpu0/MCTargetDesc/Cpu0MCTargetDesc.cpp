@@ -164,6 +164,12 @@ extern "C" void LLVMInitializeCpu0TargetMC() {
 	                                      createCpu0MCInstPrinter);
   }
 
+  // Register the MC Code Emitter
+  TargetRegistry::RegisterMCCodeEmitter(TheCpu0Target,
+                                        createCpu0MCCodeEmitterEB);
+  TargetRegistry::RegisterMCCodeEmitter(TheCpu0elTarget,
+                                        createCpu0MCCodeEmitterEL);
+
 }
 //@2 }
 

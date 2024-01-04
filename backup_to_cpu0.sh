@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 FR_PROJECT=~/llvm-project
 TO_PROJECT=~/llvm-cpu0/src
